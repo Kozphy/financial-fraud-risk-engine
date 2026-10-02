@@ -1,0 +1,42 @@
+# All tunable values live here. Cost values are illustrative, not real banking economics.
+
+seed = 42
+
+[data]
+n_transactions = 20000
+n_customers = 1000
+fraud_rate = 0.02          # synthetic prevalence; not a claim about real fraud rates
+days = 90
+start = "2026-01-01T00:00:00Z"
+
+[split]
+train_fraction = 0.70
+validation_fraction = 0.15  # the newest remainder (0.15) is the untouched test set
+
+[costs]
+false_positive = 5.0        # e.g. analyst review time / customer friction on a legitimate payment
+false_negative = 500.0      # e.g. loss from a missed fraudulent payment
+
+[thresholds]
+# Candidate review thresholds evaluated on the validation set only. The grid starts low on
+# purpose: with calibrated probabilities the cost-minimising cut-off is about
+# false_positive / (false_positive + false_negative) = 5 / 505 ~ 0.01, far below 0.5.
+grid_start = 0.001
+grid_stop = 0.999
+grid_step = 0.001
+# BLOCK is only automated where validation precision is high and supported by enough cases.
+block_min_precision = 0.90
+block_min_support = 5
+
+[models.logistic_regression]
+version = "logistic-v1"
+
+[models.random_forest]
+version = "random-forest-v1"
+
+[promotion]
+# The candidate replaces the baseline only if it cuts validation expected cost by at least this fraction.
+min_relative_cost_improvement = 0.10
+
+[policy]
+version = "policy-v1"
